@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "GRUGWUrv1dw=",
+  "dgSpecHash": "2P3ohQpkSbY=",
   "success": true,
-  "projectFilePath": "C:\\Users\\crisa\\Haufe\\Backend\\Backend\\Backend.csproj",
+  "projectFilePath": "C:\\Users\\crisa\\Exercitii\\Backend\\Backend\\Backend.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\crisa\\.nuget\\packages\\humanizer\\2.14.1\\humanizer.2.14.1.nupkg.sha512",
     "C:\\Users\\crisa\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",

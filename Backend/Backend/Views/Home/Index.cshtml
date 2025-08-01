@@ -1,9 +1,13 @@
-﻿@{
+﻿@using Microsoft.AspNetCore.Identity
+@using Backend.Areas.Identity.Data
+@inject UserManager<ApplicationUser> UserManager
+
+@{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
     <h1 class="display-4">Welcome - Backend -</h1>
-    <p>User id:@ViewData["UserID"]</p>
+    <p>User ID: @UserManager.GetUserId(User)</p>
     <a asp-controller="Home" asp-action="GetToApi" class="btn btn-primary mb-3">API</a>
 </div>

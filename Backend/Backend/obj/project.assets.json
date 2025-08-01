@@ -7562,11 +7562,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\crisa\\Haufe\\Backend\\Backend\\Backend.csproj",
+      "projectUniqueName": "C:\\Users\\crisa\\Exercitii\\Backend\\Backend\\Backend.csproj",
       "projectName": "Backend",
-      "projectPath": "C:\\Users\\crisa\\Haufe\\Backend\\Backend\\Backend.csproj",
+      "projectPath": "C:\\Users\\crisa\\Exercitii\\Backend\\Backend\\Backend.csproj",
       "packagesPath": "C:\\Users\\crisa\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\crisa\\Haufe\\Backend\\Backend\\obj\\",
+      "outputPath": "C:\\Users\\crisa\\Exercitii\\Backend\\Backend\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

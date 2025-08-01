@@ -25,6 +25,11 @@ namespace Backend.Controllers
             return View();
         }
 
+        public IActionResult GetToApi()
+        {
+            return Redirect("/swagger");
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
