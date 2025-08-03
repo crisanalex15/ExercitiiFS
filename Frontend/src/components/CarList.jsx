@@ -8,10 +8,6 @@ const CarList = () => {
   const [showCreateCar, setShowCreateCar] = useState(false);
   const [editingCar, setEditingCar] = useState(null);
 
-  const editCar = (car) => {
-    setEditingCar(car);
-    setShowCreateCar(true);
-  };
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -63,7 +59,13 @@ const CarList = () => {
                   🚗 {car.brand} {car.model}
                 </h3>
                 <div className="card-actions">
-                  <button onClick={() => editCar(car)} className="btn btn-edit">
+                  <button
+                    onClick={() => {
+                      setShowCreateCar(true);
+                      setEditingCar(car);
+                    }}
+                    className="btn btn-edit"
+                  >
                     ✏️ Editează
                   </button>
                   <button

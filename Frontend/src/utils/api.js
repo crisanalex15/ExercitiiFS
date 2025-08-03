@@ -94,6 +94,56 @@ const deleteCar = async (id) => {
   return { success: true };
 };
 
+const URL_MOTO = "http://localhost:5086/api/motorcycle";
+
+const getMotociclete = async () => {
+  const response = await fetch(`${URL_MOTO}/motociclete`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch motociclete");
+  }
+  const data = await response.json();
+  if (data.error) {
+    throw new Error(data.error);
+  }
+  return data;
+};
+
+const createMotocicleta = async (motocicleta) => {
+  const response = await fetch(`${URL_MOTO}/motociclete`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(motocicleta),
+  });
+  const data = await response.json();
+  return data;
+};
+
+const updateMotocicleta = async (id, motocicleta) => {
+  const response = await fetch(`${URL_MOTO}/motociclete/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(motocicleta),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to update motocicleta");
+  }
+  const data = await response.json();
+  return data;
+};
+
+const deleteMotocicleta = async (id) => {
+  const response = await fetch(`${URL_MOTO}/motociclete/${id}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to delete motocicleta");
+  }
+  return { success: true };
+};
 // Export all API functions
 export {
   getEngines,
@@ -104,4 +154,8 @@ export {
   createCar,
   updateCar,
   deleteCar,
+  getMotociclete,
+  createMotocicleta,
+  updateMotocicleta,
+  deleteMotocicleta,
 };

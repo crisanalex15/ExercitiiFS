@@ -15,6 +15,8 @@ public class AuthDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Car> Cars { get; set; }
     public DbSet<Engine> Engines { get; set; }
 
+    public DbSet<Motociclete> Motociclete { get; set; }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -32,5 +34,6 @@ public class AuthDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<IdentityUserToken<string>>().ToTable("UserTokens");
 
         builder.Entity<Car>().HasOne(c => c.Engine).WithMany().HasForeignKey(c => c.EngineId);
+        builder.Entity<Motociclete>().HasOne(m => m.Engine).WithMany().HasForeignKey(m => m.EngineId);
     }
 }

@@ -1,24 +1,27 @@
 import React from "react";
+import { Routes, Route } from "react-router-dom";
 import "./style.scss";
 import CarList from "./CarList";
+import EngineList from "./EngineList";
+import Header from "./Header";
+import MotorcycleList from "./MotorcycleList";
 
 const MainPage = () => {
   return (
-    <div className="main-page">
-      <div className="main-page__header">
-        <h1>🚗 Car & Engine Management</h1>
-        <p>
-          Gestionează cu ușurință mașinile și motoarele din parcul tău auto.
-          Creează, editează și organizează datele tehnice ale vehiculelor.
-        </p>
-      </div>
-
-      <div className="main-page__content">
-        <div className="main-page__section">
-          <CarList />
+    <>
+      <Header />
+      <div className="main-page">
+        <div className="main-page__content">
+          <div className="main-page__section">
+            <Routes>
+              <Route path="/" element={<CarList />} />
+              <Route path="/motociclete" element={<MotorcycleList />} />
+              <Route path="/engines" element={<EngineList />} />
+            </Routes>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
