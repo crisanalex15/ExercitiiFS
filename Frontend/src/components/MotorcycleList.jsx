@@ -1,6 +1,6 @@
 import { useMotociclete, useDeleteMotocicleta } from "../hooks/UseMoto";
 import MotorcycleForm from "./MotorcycleForm";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import "./style.scss";
 
 const MotorcycleList = () => {
@@ -8,6 +8,9 @@ const MotorcycleList = () => {
   const { mutate: deleteMotocicleta } = useDeleteMotocicleta();
   const [showCreateMotocicleta, setShowCreateMotocicleta] = useState(false);
   const [editingMotocicleta, setEditingMotocicleta] = useState(null);
+  const [sortBy, setSortBy] = useState("default"); // default, year, brand, price
+  const [sortOrder, setSortOrder] = useState("asc"); // asc, desc
+  const [filterBy, setFilterBy] = useState("");
 
   const editMotocicleta = (motocicleta) => {
     setEditingMotocicleta(motocicleta);
@@ -17,6 +20,45 @@ const MotorcycleList = () => {
   const handleDelete = (id) => {
     if (window.confirm("Ești sigur că vrei să ștergi această motocicletă?")) {
       deleteMotocicleta(id);
+    }
+  };
+
+  const filteredAndSortedMotociclete = useMemo(() => {
+    if (!motociclete) return [];
+
+    let filtered = motociclete.filter((motocicleta) => {
+      if (!filterBy) return true;
+      return (
+        motocicleta.brand.toLowerCase().includes(filterBy.toLowerCase()) ||
+        motocicleta.model.toLowerCase().includes(filterBy.toLowerCase()) ||
+        motocicleta.color.toLowerCase().includes(filterBy.toLowerCase()) ||
+        motocicleta.transmission.toLowerCase().includes(filterBy.toLowerCase())
+      );
+    });
+    if (sortBy === "year") {
+      filtered.sort((a, b) =>
+        sortOrder === "asc" ? a.year - b.year : b.year - a.year
+      );
+    } else if (sortBy === "brand") {
+      filtered.sort((a, b) =>
+        sortOrder === "asc"
+          ? a.brand.localeCompare(b.brand)
+          : b.brand.localeCompare(a.brand)
+      );
+    } else if (sortBy === "price") {
+      filtered.sort((a, b) =>
+        sortOrder === "asc" ? a.price - b.price : b.price - a.price
+      );
+    }
+    return filtered;
+  }, [motociclete, sortBy, sortOrder, filterBy]);
+
+  const handleSort = (criteria) => {
+    if (sortBy === criteria) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(criteria);
+      setSortOrder("asc");
     }
   };
 
@@ -32,6 +74,37 @@ const MotorcycleList = () => {
     <div className="container">
       <div className="page-header">
         <h2 className="page-title">🏍️ Lista Motocicletelor</h2>
+        <input
+          type="text"
+          placeholder="🔍 Caută după marcă, model, culoare..."
+          value={filterBy}
+          onChange={(e) => setFilterBy(e.target.value)}
+          className="search-input"
+        />
+        <button
+          className={`btn ${
+            sortBy === "year" ? "btn-active" : "btn-secondary"
+          }`}
+          onClick={() => handleSort("year")}
+        >
+          📅 An {sortBy === "year" && (sortOrder === "asc" ? "↑" : "↓")}
+        </button>
+        <button
+          className={`btn ${
+            sortBy === "brand" ? "btn-active" : "btn-secondary"
+          }`}
+          onClick={() => handleSort("brand")}
+        >
+          🏢 Marcă {sortBy === "brand" && (sortOrder === "asc" ? "↑" : "↓")}
+        </button>
+        <button
+          className={`btn ${
+            sortBy === "price" ? "btn-active" : "btn-secondary"
+          }`}
+          onClick={() => handleSort("price")}
+        >
+          💰 Preț {sortBy === "price" && (sortOrder === "asc" ? "↑" : "↓")}
+        </button>
         <button
           onClick={() => setShowCreateMotocicleta(true)}
           className="btn btn-create"
@@ -56,17 +129,19 @@ const MotorcycleList = () => {
         </div>
       )}
 
-      {motociclete && motociclete.length === 0 ? (
+      {filteredAndSortedMotociclete.length === 0 ? (
         <div className="card">
           <div className="card-content">
             <p className="empty-message">
-              Nu există motociclete în baza de date.
+              {filterBy
+                ? `Nu s-au găsit motociclete care să conțină "${filterBy}".`
+                : "Nu există motociclete în baza de date."}
             </p>
           </div>
         </div>
       ) : (
         <div className="grid grid-auto">
-          {motociclete.map((motocicleta) => (
+          {filteredAndSortedMotociclete.map((motocicleta) => (
             <div key={motocicleta.id} className="card">
               <div className="card-header">
                 <h3>

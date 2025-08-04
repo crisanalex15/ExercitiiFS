@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useEngines, useDeleteEngine } from "../hooks/useCars";
 import EngineForm from "./EngineForm";
 import "./style.scss";
@@ -8,6 +8,7 @@ function EngineList({ onEdit }) {
   const { mutate: deleteEngine } = useDeleteEngine();
   const [editingEngine, setEditingEngine] = useState(null);
   const [showCreateEngine, setShowCreateEngine] = useState(false);
+  const [filterBy, setFilterBy] = useState("");
 
   const editEngine = (engine) => {
     setEditingEngine(engine);
@@ -20,6 +21,21 @@ function EngineList({ onEdit }) {
     }
   };
 
+  const filteredEngines = useMemo(() => {
+    if (!engines) return [];
+    let filtered = engines.filter((engine) => {
+      if (!filterBy) return true;
+      return (
+        engine.brand.toLowerCase().includes(filterBy.toLowerCase()) ||
+        engine.fuelType.toLowerCase().includes(filterBy.toLowerCase()) ||
+        engine.power.toLowerCase().includes(filterBy.toLowerCase()) ||
+        engine.torque.toLowerCase().includes(filterBy.toLowerCase()) ||
+        engine.displacement.toLowerCase().includes(filterBy.toLowerCase())
+      );
+    });
+    return filtered;
+  }, [engines, filterBy]);
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -31,6 +47,13 @@ function EngineList({ onEdit }) {
     <div className="container">
       <div className="page-header">
         <h2 className="page-title">🔧 Lista Motoarelor</h2>
+        <input
+          type="text"
+          placeholder="🔍 Caută după marcă, combustibil, putere..."
+          value={filterBy}
+          onChange={(e) => setFilterBy(e.target.value)}
+          className="search-input"
+        />
         <button
           onClick={() => setShowCreateEngine(true)}
           className="btn btn-create"
@@ -55,15 +78,19 @@ function EngineList({ onEdit }) {
         </div>
       )}
 
-      {engines && engines.length === 0 ? (
+      {filteredEngines.length === 0 ? (
         <div className="card">
           <div className="card-content">
-            <p className="empty-message">Nu există motoare în baza de date.</p>
+            <p className="empty-message">
+              {filterBy
+                ? `Nu s-au găsit motoare care să conțină "${filterBy}".`
+                : "Nu există motoare în baza de date."}
+            </p>
           </div>
         </div>
       ) : (
         <div className="grid grid-auto">
-          {engines.map((engine) => (
+          {filteredEngines.map((engine) => (
             <div key={engine.id} className="card">
               <div className="card-header">
                 <h3>🔧 {engine.Brand || engine.brand}</h3>

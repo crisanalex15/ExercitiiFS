@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import ThemeToggle from "./ThemeToggle";
 import "./style.scss";
 
 const Header = () => {
@@ -9,6 +10,7 @@ const Header = () => {
       <div className="header-content">
         <h1 className="header-title">🚀 Garage Manager</h1>
         <div className="header-buttons">
+          {/* Navigation Buttons */}
           <button onClick={() => navigate("/")} className="btn btn-nav">
             🚗 Mașini
           </button>
@@ -21,6 +23,9 @@ const Header = () => {
           <button onClick={() => navigate("/engines")} className="btn btn-nav">
             🔧 Motoare
           </button>
+
+          {/* Theme Toggle */}
+          <ThemeToggle />
         </div>
       </div>
     </div>

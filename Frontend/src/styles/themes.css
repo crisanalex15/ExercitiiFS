@@ -1,0 +1,179 @@
+/* 
+🎨 SISTEMUL DE TEME CU CSS CUSTOM PROPERTIES
+=====================================
+
+CSS Custom Properties (CSS Variables) ne permit să definim valori reutilizabile
+care pot fi schimbate dinamic prin JavaScript.
+
+Sintaxa: --nume-variabila: valoare;
+Utilizare: var(--nume-variabila)
+*/
+
+/* 
+🌅 TEMA LIGHT (DEFAULT)
+Aplicată prin [data-theme="light"] sau .light-theme
+*/
+:root,
+[data-theme="light"],
+.light-theme {
+  /* CULORI PRINCIPALE */
+  --color-primary: #007bff;
+  --color-primary-hover: #0056b3;
+  --color-primary-light: #cce7ff;
+
+  --color-secondary: #6c757d;
+  --color-secondary-hover: #545b62;
+
+  --color-success: #28a745;
+  --color-warning: #ffc107;
+  --color-danger: #dc3545;
+  --color-info: #17a2b8;
+
+  /* BACKGROUNDS */
+  --bg-primary: #ffffff; /* Fundal principal */
+  --bg-secondary: #f8f9fa; /* Fundal secundar */
+  --bg-card: #ffffff; /* Fundal carduri */
+  --bg-header: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --bg-input: #ffffff; /* Fundal input-uri */
+  --bg-hover: #f1f3f4; /* Hover state */
+  --bg-active: #e9ecef; /* Active state */
+
+  /* TEXT COLORS */
+  --text-primary: #212529; /* Text principal */
+  --text-secondary: #6c757d; /* Text secundar */
+  --text-muted: #adb5bd; /* Text estompat */
+  --text-inverse: #ffffff; /* Text pe fundal întunecat */
+  --text-link: #007bff; /* Link-uri */
+  --text-link-hover: #0056b3; /* Link-uri hover */
+
+  /* BORDERS */
+  --border-color: #dee2e6; /* Borduri standard */
+  --border-light: #e9ecef; /* Borduri ușoare */
+  --border-dark: #adb5bd; /* Borduri întunecate */
+
+  /* SHADOWS */
+  --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  --shadow-md: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  --shadow-xl: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+
+  /* OPACITIES pentru overlay-uri */
+  --overlay-light: rgba(255, 255, 255, 0.9);
+  --overlay-dark: rgba(0, 0, 0, 0.5);
+}
+
+/* 
+🌙 TEMA DARK 
+Aplicată prin [data-theme="dark"] sau .dark-theme
+*/
+[data-theme="dark"],
+.dark-theme {
+  /* CULORI PRINCIPALE - Adaptate pentru dark mode */
+  --color-primary: #4dabf7; /* Albastru mai deschis */
+  --color-primary-hover: #339af0;
+  --color-primary-light: #1c2942;
+
+  --color-secondary: #adb5bd;
+  --color-secondary-hover: #ced4da;
+
+  --color-success: #40c057;
+  --color-warning: #fab005;
+  --color-danger: #f03e3e;
+  --color-info: #22b8cf;
+
+  /* BACKGROUNDS - Scheme întunecat */
+  --bg-primary: #121212; /* Fundal principal foarte întunecat */
+  --bg-secondary: #1e1e1e; /* Fundal secundar */
+  --bg-card: #2d2d2d; /* Fundal carduri */
+  --bg-header: linear-gradient(135deg, #2d3436 0%, #636e72 100%);
+  --bg-input: #3a3a3a; /* Fundal input-uri */
+  --bg-hover: #404040; /* Hover state */
+  --bg-active: #4a4a4a; /* Active state */
+
+  /* TEXT COLORS - Inversate pentru lizibilitate */
+  --text-primary: #f8f9fa; /* Text principal alb */
+  --text-secondary: #adb5bd; /* Text secundar gri deschis */
+  --text-muted: #6c757d; /* Text estompat */
+  --text-inverse: #212529; /* Text pe fundal deschis */
+  --text-link: #4dabf7; /* Link-uri albastre */
+  --text-link-hover: #74c0fc; /* Link-uri hover */
+
+  /* BORDERS - Adaptate pentru tema întunecată */
+  --border-color: #495057; /* Borduri standard */
+  --border-light: #343a40; /* Borduri ușoare */
+  --border-dark: #6c757d; /* Borduri întunecate */
+
+  /* SHADOWS - Reduse pentru tema întunecată */
+  --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 0.5rem 1rem rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 1rem 3rem rgba(0, 0, 0, 0.6);
+
+  /* OPACITIES */
+  --overlay-light: rgba(255, 255, 255, 0.1);
+  --overlay-dark: rgba(0, 0, 0, 0.8);
+}
+
+/* 
+🔄 TRANZIȚII SMOOTH pentru schimbarea temei
+Aplicăm tranziții pe toate elementele pentru o schimbare fluidă
+*/
+*,
+*::before,
+*::after {
+  transition: background-color 0.3s ease, color 0.3s ease,
+    border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* 
+💡 UTILITĂȚI pentru debugging
+Folosește acestea pentru a testa rapid temele
+*/
+.debug-theme-colors {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+}
+
+/* 
+📱 RESPONSIVE adjustments pentru teme
+Pe dispozitive mici, reducem intensity-ul unor efecte
+*/
+@media (max-width: 768px) {
+  :root {
+    --shadow-lg: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  }
+
+  [data-theme="dark"] {
+    --shadow-lg: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.4);
+    --shadow-xl: 0 0.5rem 1rem rgba(0, 0, 0, 0.5);
+  }
+}
+
+/*
+🎯 CONCEPTE CHEIE învățate:
+
+1. CSS Custom Properties:
+   - Se definesc cu --nume: valoare
+   - Se folosesc cu var(--nume)
+   - Pot fi schimbate dinamic prin JS
+
+2. Cascade și Specificitate:
+   - :root are cea mai mică specificitate
+   - [data-theme] și .clase au specificitate mai mare
+   - Valorile se suprascriu în funcție de specificitate
+
+3. Naming Convention:
+   - --tip-element-varianta (ex: --bg-card-hover)
+   - Consistență în denumiri pentru mentenanță ușoară
+
+4. Responsive Design:
+   - Media queries pentru ajustări pe dispozitive mici
+   - Reducerea efectelor vizuale pe mobile
+
+5. Transitions:
+   - Tranziții smooth între teme
+   - Aplicare globală pentru consistență
+*/

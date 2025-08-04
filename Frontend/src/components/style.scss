@@ -46,7 +46,6 @@
   border-bottom: 3px solid rgba(255, 255, 255, 0.1);
   box-shadow: var(--shadow-lg);
   padding: var(--spacing-lg) 0;
-  margin-bottom: var(--spacing-xl);
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -106,5 +105,57 @@
   @media (max-width: 768px) {
     padding: var(--spacing-xs) var(--spacing-md);
     font-size: 0.9rem;
+  }
+}
+
+// Sort and Filter Controls
+.btn-secondary {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  border: 1px solid #dee2e6;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  margin-right: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+  }
+}
+
+.btn-active {
+  background-color: #007bff;
+  color: white;
+  border: 1px solid #007bff;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  margin-right: 8px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+  }
+}
+
+.search-input {
+  margin-left: 10px;
+  flex: 1;
+  max-width: 300px;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+
+  &:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
   }
 }
