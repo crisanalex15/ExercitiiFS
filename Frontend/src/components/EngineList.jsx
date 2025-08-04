@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useEngines, useDeleteEngine } from "../hooks/useCars";
 import EngineForm from "./EngineForm";
 import "./style.scss";
@@ -9,6 +9,8 @@ function EngineList({ onEdit }) {
   const [editingEngine, setEditingEngine] = useState(null);
   const [showCreateEngine, setShowCreateEngine] = useState(false);
   const [filterBy, setFilterBy] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedEngine, setSelectedEngine] = useState(null);
 
   const editEngine = (engine) => {
     setEditingEngine(engine);
@@ -36,6 +38,25 @@ function EngineList({ onEdit }) {
     return filtered;
   }, [engines, filterBy]);
 
+  // ESC key support pentru închiderea modalului
+  useEffect(() => {
+    const handleEscKey = (event) => {
+      if (event.key === "Escape" && showDeleteModal) {
+        setShowDeleteModal(false);
+      }
+    };
+
+    // Adăugăm event listener doar când modalul este deschis
+    if (showDeleteModal) {
+      document.addEventListener("keydown", handleEscKey);
+    }
+
+    // Cleanup function
+    return () => {
+      document.removeEventListener("keydown", handleEscKey);
+    };
+  }, [showDeleteModal]);
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -44,107 +65,139 @@ function EngineList({ onEdit }) {
   }
 
   return (
-    <div className="container">
-      <div className="page-header">
-        <h2 className="page-title">🔧 Lista Motoarelor</h2>
-        <input
-          type="text"
-          placeholder="🔍 Caută după marcă, combustibil, putere..."
-          value={filterBy}
-          onChange={(e) => setFilterBy(e.target.value)}
-          className="search-input"
-        />
-        <button
-          onClick={() => setShowCreateEngine(true)}
-          className="btn btn-create"
-        >
-          + Adaugă Motor
-        </button>
-      </div>
-
-      {showCreateEngine && (
-        <div style={{ marginBottom: "var(--spacing-xl)" }}>
-          <EngineForm
-            editingEngine={editingEngine}
-            onSave={() => {
-              setShowCreateEngine(false);
-              setEditingEngine(null);
-            }}
-            onCancel={() => {
-              setShowCreateEngine(false);
-              setEditingEngine(null);
-            }}
+    <>
+      <div className="container">
+        <div className="page-header">
+          <h2 className="page-title">🔧 Lista Motoarelor</h2>
+          <input
+            type="text"
+            placeholder="🔍 Caută după marcă, combustibil, putere..."
+            value={filterBy}
+            onChange={(e) => setFilterBy(e.target.value)}
+            className="search-input"
           />
+          <button
+            onClick={() => setShowCreateEngine(true)}
+            className="btn btn-create"
+          >
+            + Adaugă Motor
+          </button>
         </div>
-      )}
 
-      {filteredEngines.length === 0 ? (
-        <div className="card">
-          <div className="card-content">
-            <p className="empty-message">
-              {filterBy
-                ? `Nu s-au găsit motoare care să conțină "${filterBy}".`
-                : "Nu există motoare în baza de date."}
-            </p>
+        {showCreateEngine && (
+          <div style={{ marginBottom: "var(--spacing-xl)" }}>
+            <EngineForm
+              editingEngine={editingEngine}
+              onSave={() => {
+                setShowCreateEngine(false);
+                setEditingEngine(null);
+              }}
+              onCancel={() => {
+                setShowCreateEngine(false);
+                setEditingEngine(null);
+              }}
+            />
           </div>
-        </div>
-      ) : (
-        <div className="grid grid-auto">
-          {filteredEngines.map((engine) => (
-            <div key={engine.id} className="card">
-              <div className="card-header">
-                <h3>🔧 {engine.Brand || engine.brand}</h3>
-                <div className="card-actions">
-                  <button
-                    onClick={() => editEngine(engine)}
-                    className="btn btn-edit"
-                  >
-                    ✏️ Editează
-                  </button>
-                  <button
-                    onClick={() => handleDelete(engine.id)}
-                    className="btn btn-delete"
-                  >
-                    🗑️ Șterge
-                  </button>
-                </div>
-              </div>
+        )}
 
-              <div className="card-content">
-                <div className="car-details">
-                  <div className="detail-row">
-                    <span className="detail-label">⛽ Combustibil:</span>
-                    <span className="detail-value">
-                      {engine.FuelType || engine.fuelType}
-                    </span>
+        {filteredEngines.length === 0 ? (
+          <div className="card">
+            <div className="card-content">
+              <p className="empty-message">
+                {filterBy
+                  ? `Nu s-au găsit motoare care să conțină "${filterBy}".`
+                  : "Nu există motoare în baza de date."}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-auto">
+            {filteredEngines.map((engine) => (
+              <div key={engine.id} className="card">
+                <div className="card-header">
+                  <h3>🔧 {engine.Brand || engine.brand}</h3>
+                  <div className="card-actions">
+                    <button
+                      onClick={() => editEngine(engine)}
+                      className="btn btn-edit"
+                    >
+                      ✏️ Editează
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedEngine(engine);
+                        setShowDeleteModal(true);
+                      }}
+                      className="btn btn-delete"
+                    >
+                      🗑️ Șterge
+                    </button>
                   </div>
-                  <div className="detail-row">
-                    <span className="detail-label">⚡ Putere:</span>
-                    <span className="detail-value">
-                      {engine.Power || engine.power}
-                    </span>
-                  </div>
-                  <div className="detail-row">
-                    <span className="detail-label">🔩 Cuplu:</span>
-                    <span className="detail-value">
-                      {engine.Torque || engine.torque}
-                    </span>
-                  </div>
-                  <div className="detail-row">
-                    <span className="detail-label">
-                      🔧 Capacitate Cilindrică:
-                    </span>
-                    <span className="detail-value">
-                      {engine.Displacement || engine.displacement}
-                    </span>
+                </div>
+
+                <div className="card-content">
+                  <div className="car-details">
+                    <div className="detail-row">
+                      <span className="detail-label">⛽ Combustibil:</span>
+                      <span className="detail-value">
+                        {engine.FuelType || engine.fuelType}
+                      </span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="detail-label">⚡ Putere:</span>
+                      <span className="detail-value">
+                        {engine.Power || engine.power}
+                      </span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="detail-label">🔩 Cuplu:</span>
+                      <span className="detail-value">
+                        {engine.Torque || engine.torque}
+                      </span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="detail-label">
+                        🔧 Capacitate Cilindrică:
+                      </span>
+                      <span className="detail-value">
+                        {engine.Displacement || engine.displacement}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+        )}
+      </div>
+      <div
+        className="delete-modal"
+        style={{ visibility: showDeleteModal ? "visible" : "hidden" }}
+        onClick={() => setShowDeleteModal(false)}
+      >
+        <div
+          className="delete-modal-content"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h2>
+            Ștergere Motor {selectedEngine?.Brand || selectedEngine?.brand}
+          </h2>
+          <p>Vrei să ștergi acest motor?</p>
+          <button
+            className="deleteButton"
+            onClick={() => deleteEngine(selectedEngine.id)}
+          >
+            Șterge
+          </button>
+          <button
+            className="cancelButton"
+            onClick={() => setShowDeleteModal(false)}
+          >
+            Renunță
+          </button>
         </div>
-      )}
-    </div>
+      </div>
+    </>
   );
 }
 

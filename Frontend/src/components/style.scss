@@ -40,6 +40,68 @@
   overflow: hidden;
 }
 
+.delete-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  visibility: hidden;
+  cursor: pointer; /* Indică că este clickabil */
+  transition: all 0.3s ease; /* Tranziție smooth */
+
+  /* Când este vizibil */
+  &[style*="visible"] {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  /* Animație de fade-in/fade-out */
+  opacity: 0;
+}
+
+.delete-modal-content {
+  background-color: var(--bg-card);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-lg);
+  padding: var(--spacing-xl);
+  cursor: default; /* Cursor normal pentru conținut */
+  transform: scale(0.9); /* Început animație */
+  transition: transform 0.3s ease; /* Tranziție smooth */
+
+  /* Când modalul este vizibil */
+  .delete-modal[style*="visible"] & {
+    transform: scale(1); /* Animație de scale-up */
+  }
+
+  button {
+    margin-right: var(--spacing-sm);
+    margin-left: var(--spacing-sm);
+    width: 100px;
+    height: 30px;
+    border-radius: var(--border-radius);
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .deleteButton {
+    background-color: #dc3545;
+    color: white;
+  }
+
+  .cancelButton {
+    background-color: #6c757d;
+    color: white;
+  }
+}
+
 // Header Styling
 .header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -157,5 +219,16 @@
     outline: none;
     border-color: #007bff;
     box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+  }
+
+  .motoSortFilter button {
+    width: 100px;
+    height: 30px;
+    border-radius: var(--border-radius);
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
   }
 }
