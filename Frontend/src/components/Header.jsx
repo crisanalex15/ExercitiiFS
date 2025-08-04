@@ -23,6 +23,9 @@ const Header = () => {
           <button onClick={() => navigate("/engines")} className="btn btn-nav">
             🔧 Motoare
           </button>
+          <button onClick={() => navigate("/hooks")} className="btn btn-nav">
+            🎣 React Hooks
+          </button>
 
           {/* Theme Toggle */}
           <ThemeToggle />

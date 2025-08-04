@@ -5,6 +5,7 @@ import CarList from "./CarList";
 import EngineList from "./EngineList";
 import Header from "./Header";
 import MotorcycleList from "./MotorcycleList";
+import HooksDemo from "./HooksDemo";
 
 const MainPage = () => {
   return (
@@ -17,6 +18,7 @@ const MainPage = () => {
               <Route path="/" element={<CarList />} />
               <Route path="/motociclete" element={<MotorcycleList />} />
               <Route path="/engines" element={<EngineList />} />
+              <Route path="/hooks" element={<HooksDemo />} />
             </Routes>
           </div>
         </div>
