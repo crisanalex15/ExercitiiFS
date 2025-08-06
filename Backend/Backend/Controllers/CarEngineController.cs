@@ -22,10 +22,31 @@ namespace Backend.Controllers
         [HttpGet]
         [Route("api/car-engine/cars")]
         [AllowAnonymous]
-        public IActionResult GetCars()
+        public IActionResult GetCars(int page = 1, int pageSize = 6)
         {
-            var cars = _context.Cars.Include(c => c.Engine).ToList();
-            return Ok(cars);
+            try
+            {
+                // Validare parametri
+                if (page < 1) page = 1;
+                if (pageSize < 1 || pageSize > 100) pageSize = 6;
+
+                var totalCount = _context.Cars.Count();
+                var cars = _context.Cars
+                    .Include(c => c.Engine)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                // Pentru debugging
+                _logger.LogInformation($"Fetching page {page}, pageSize {pageSize}, found {cars.Count} cars, total: {totalCount}");
+
+                return Ok(cars);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching cars");
+                return StatusCode(500, new { error = "Internal server error", message = ex.Message });
+            }
         }
 
         [HttpPost]
@@ -61,7 +82,7 @@ namespace Backend.Controllers
             // Returnează mașina cu engine-ul inclus
             var savedCar = _context.Cars.Include(c => c.Engine)
                                       .FirstOrDefault(c => c.Id == car.Id);
-            
+
             return Ok(savedCar);
         }
 
@@ -92,9 +113,9 @@ namespace Backend.Controllers
             existingCar.Mileage = carDto.Mileage;
             existingCar.Price = carDto.Price;
             existingCar.EngineId = carDto.EngineId;
-            
+
             _context.SaveChanges();
-            
+
             // Returnează mașina actualizată cu engine-ul inclus
             var updatedCar = _context.Cars.Include(c => c.Engine)
                                         .FirstOrDefault(c => c.Id == id);
@@ -104,7 +125,7 @@ namespace Backend.Controllers
         [HttpDelete]
         [Route("api/car-engine/cars/{id}")]
         [AllowAnonymous]
-        public IActionResult DeleteCar(int id)  
+        public IActionResult DeleteCar(int id)
         {
             var car = _context.Cars.Find(id);
             if (car == null)
@@ -140,29 +161,29 @@ namespace Backend.Controllers
         [AllowAnonymous]
         public IActionResult UpdateEngine(int id, [FromBody] Engine engine)
         {
-            try 
+            try
             {
                 var existingEngine = _context.Engines.Find(id);
                 if (existingEngine == null)
                 {
                     return NotFound(new { message = "Engine not found" });
                 }
-                
+
                 existingEngine.Brand = engine.Brand;
                 existingEngine.FuelType = engine.FuelType;
                 existingEngine.Power = engine.Power;
                 existingEngine.Torque = engine.Torque;
                 existingEngine.Displacement = engine.Displacement;
-                
+
                 _context.SaveChanges();
-                
+
                 return Ok(existingEngine);
             }
             catch (Exception ex)
             {
                 return BadRequest(new { message = "Update failed", error = ex.Message });
             }
-        }   
+        }
 
         [HttpDelete]
         [Route("api/car-engine/engines/{id}")]

@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import {
   getEngines,
   createEngine,
@@ -22,9 +23,12 @@ export const useEngines = () => {
 
 // Hook pentru obținerea mașinilor
 export const useCars = () => {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: ["cars"],
-    queryFn: getCars,
+    queryFn: ({ pageParam = 1 }) => getCars(pageParam, 6),
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    getPreviousPageParam: (firstPage) => firstPage.prevPage,
+    initialPageParam: 1,
     staleTime: 5 * 60 * 1000, // 5 minute
     cacheTime: 10 * 60 * 1000, // 10 minute
   });

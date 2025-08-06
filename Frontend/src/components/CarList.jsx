@@ -1,10 +1,25 @@
 import { useCars, useDeleteCar } from "../hooks/useCars";
 import CreateCar from "./CreateCar";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { useDebounce } from "../hooks/useAdvancedHooks";
 import "./style.scss";
 
 const CarList = () => {
-  const { data: cars, isLoading, error } = useCars();
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useCars();
+
+  // Flatten all pages data into a single array
+  const cars = data?.pages.flatMap((page) => page.data) || [];
+
+  // Ref pentru intersection observer
+  const loaderRef = useRef(null);
+
   const { mutate: deleteCar } = useDeleteCar();
   const [showCreateCar, setShowCreateCar] = useState(false);
   const [editingCar, setEditingCar] = useState(null);
@@ -14,19 +29,22 @@ const CarList = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedCar, setSelectedCar] = useState(null);
 
+  // Debounced search pentru optimizarea performanței
+  const debouncedFilter = useDebounce(filterBy, 300);
+
   // IMPORTANT: Toate hook-urile trebuie să fie apelate înainte de orice early return
   // Filtrare și sortare cu useMemo pentru performanță
   const filteredAndSortedCars = useMemo(() => {
     if (!cars) return [];
 
-    // Aplicăm filtrarea
+    // Aplicăm filtrarea cu debounced value
     let filtered = cars.filter((car) => {
-      if (!filterBy) return true;
+      if (!debouncedFilter) return true;
       return (
-        car.brand.toLowerCase().includes(filterBy.toLowerCase()) ||
-        car.model.toLowerCase().includes(filterBy.toLowerCase()) ||
-        car.color.toLowerCase().includes(filterBy.toLowerCase()) ||
-        car.transmission.toLowerCase().includes(filterBy.toLowerCase())
+        car.brand.toLowerCase().includes(debouncedFilter.toLowerCase()) ||
+        car.model.toLowerCase().includes(debouncedFilter.toLowerCase()) ||
+        car.color.toLowerCase().includes(debouncedFilter.toLowerCase()) ||
+        car.transmission.toLowerCase().includes(debouncedFilter.toLowerCase())
       );
     });
 
@@ -48,7 +66,35 @@ const CarList = () => {
     }
 
     return filtered;
-  }, [cars, sortBy, sortOrder, filterBy]);
+  }, [cars, sortBy, sortOrder, debouncedFilter]);
+
+  // Intersection Observer pentru infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const target = entries[0];
+        if (target.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      {
+        root: null,
+        rootMargin: "20px",
+        threshold: 0.1,
+      }
+    );
+
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current);
+    }
+
+    return () => {
+      if (loaderRef.current) {
+        observer.unobserve(loaderRef.current);
+      }
+      observer.disconnect();
+    };
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   // ESC key support pentru închiderea modalului
   useEffect(() => {
@@ -71,11 +117,76 @@ const CarList = () => {
 
   // Early returns DUPĂ toate hook-urile
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div
+        className="container"
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "200px",
+        }}
+      >
+        <div style={{ textAlign: "center" }}>🔄 Se încarcă mașinile...</div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div>Error: {error.message}</div>;
+    return (
+      <div className="container">
+        <div className="card" style={{ margin: "20px 0" }}>
+          <div
+            className="card-content"
+            style={{
+              padding: "20px",
+              textAlign: "center",
+              color: "#dc3545",
+            }}
+          >
+            <h3>❌ Eroare la încărcarea mașinilor</h3>
+            <p>
+              <strong>Detalii:</strong> {error.message}
+            </p>
+            <details style={{ marginTop: "10px" }}>
+              <summary style={{ cursor: "pointer", color: "#6c757d" }}>
+                Informații pentru debugging
+              </summary>
+              <div
+                style={{
+                  marginTop: "10px",
+                  padding: "10px",
+                  backgroundColor: "#f8f9fa",
+                  borderRadius: "4px",
+                  fontSize: "12px",
+                  fontFamily: "monospace",
+                }}
+              >
+                <p>
+                  <strong>URL API:</strong>{" "}
+                  http://localhost:5086/api/car-engine/cars
+                </p>
+                <p>
+                  <strong>Verifică:</strong>
+                </p>
+                <ul style={{ textAlign: "left", margin: "10px 0" }}>
+                  <li>Backend-ul rulează pe portul 5086?</li>
+                  <li>CORS este configurat corect?</li>
+                  <li>Există mașini în baza de date?</li>
+                </ul>
+              </div>
+            </details>
+            <button
+              onClick={() => window.location.reload()}
+              className="btn btn-secondary"
+              style={{ marginTop: "15px" }}
+            >
+              🔄 Reîncarcă pagina
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const handleSort = (criteria) => {
@@ -176,11 +287,13 @@ const CarList = () => {
         {/* Afișăm numărul de rezultate */}
         {cars && cars.length > 0 && (
           <div style={{ margin: "16px 0", color: "#666", fontSize: "14px" }}>
-            {filterBy
-              ? `Găsite ${filteredAndSortedCars.length} mașini din ${cars.length} pentru "${filterBy}"`
-              : `Total: ${filteredAndSortedCars.length} mașini${
+            {debouncedFilter
+              ? `Găsite ${filteredAndSortedCars.length} mașini din ${cars.length} pentru "${debouncedFilter}"`
+              : `Total: ${filteredAndSortedCars.length} mașini încărcate din ${
+                  data?.pages.length || 0
+                } pagini${
                   sortBy !== "default" ? ` (sortate după ${sortBy})` : ""
-                }`}
+                } • 6 pe pagină`}
           </div>
         )}
 
@@ -204,99 +317,143 @@ const CarList = () => {
           <div className="card">
             <div className="card-content">
               <p className="empty-message">
-                {filterBy
-                  ? `Nu s-au găsit mașini care să conțină "${filterBy}".`
+                {debouncedFilter
+                  ? `Nu s-au găsit mașini care să conțină "${debouncedFilter}".`
                   : "Nu există mașini în baza de date."}
               </p>
             </div>
           </div>
         ) : (
-          <div className="grid grid-auto">
-            {filteredAndSortedCars.map((car) => (
-              <div key={car.id} className="card">
-                <div className="card-header">
-                  <h3>
-                    🚗 {car.brand} {car.model}
-                  </h3>
-                  <div className="card-actions">
-                    <button
-                      onClick={() => {
-                        setShowCreateCar(true);
-                        setEditingCar(car);
-                      }}
-                      className="btn btn-edit"
-                    >
-                      ✏️ Editează
-                    </button>
-                    <button
-                      onClick={() => {
-                        setSelectedCar(car);
-                        setShowDeleteModal(true);
-                      }}
-                      className="btn btn-delete"
-                    >
-                      🗑️ Șterge
-                    </button>
-                  </div>
-                </div>
-
-                <div className="card-content">
-                  <div className="car-details">
-                    <div className="detail-row">
-                      <span className="detail-label">📅 An:</span>
-                      <span className="detail-value">{car.year}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">🎨 Culoare:</span>
-                      <span className="detail-value">{car.color}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">⚙️ Transmisie:</span>
-                      <span className="detail-value">{car.transmission}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">📏 Kilometraj:</span>
-                      <span className="detail-value">{car.mileage}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">💰 Preț:</span>
-                      <span className="detail-value">{car.price}</span>
-                    </div>
-
-                    <div className="engine-info">
-                      <h4>🔧 Informații Motor:</h4>
-                      <div className="detail-row">
-                        <span className="detail-label">Marcă:</span>
-                        <span className="detail-value">{car.engine.brand}</span>
-                      </div>
-                      <div className="detail-row">
-                        <span className="detail-label">Cilindree:</span>
-                        <span className="detail-value">
-                          {car.engine.displacement}
-                        </span>
-                      </div>
-                      <div className="detail-row">
-                        <span className="detail-label">Putere:</span>
-                        <span className="detail-value">{car.engine.power}</span>
-                      </div>
-                      <div className="detail-row">
-                        <span className="detail-label">Cuplu:</span>
-                        <span className="detail-value">
-                          {car.engine.torque}
-                        </span>
-                      </div>
-                      <div className="detail-row">
-                        <span className="detail-label">Combustibil:</span>
-                        <span className="detail-value">
-                          {car.engine.fuelType}
-                        </span>
-                      </div>
+          <>
+            <div className="grid grid-auto">
+              {filteredAndSortedCars.map((car) => (
+                <div key={car.id} className="card">
+                  <div className="card-header">
+                    <h3>
+                      🚗 {car.brand} {car.model}
+                    </h3>
+                    <div className="card-actions">
+                      <button
+                        onClick={() => {
+                          setShowCreateCar(true);
+                          setEditingCar(car);
+                        }}
+                        className="btn btn-edit"
+                      >
+                        ✏️ Editează
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedCar(car);
+                          setShowDeleteModal(true);
+                        }}
+                        className="btn btn-delete"
+                      >
+                        🗑️ Șterge
+                      </button>
                     </div>
                   </div>
+
+                  <div className="card-content">
+                    <div className="car-details">
+                      <div className="detail-row">
+                        <span className="detail-label">📅 An:</span>
+                        <span className="detail-value">{car.year}</span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="detail-label">🎨 Culoare:</span>
+                        <span className="detail-value">{car.color}</span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="detail-label">⚙️ Transmisie:</span>
+                        <span className="detail-value">{car.transmission}</span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="detail-label">📏 Kilometraj:</span>
+                        <span className="detail-value">{car.mileage}</span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="detail-label">💰 Preț:</span>
+                        <span className="detail-value">{car.price}</span>
+                      </div>
+
+                      <div className="engine-info">
+                        <h4>🔧 Informații Motor:</h4>
+                        <div className="detail-row">
+                          <span className="detail-label">Marcă:</span>
+                          <span className="detail-value">
+                            {car.engine.brand}
+                          </span>
+                        </div>
+                        <div className="detail-row">
+                          <span className="detail-label">Cilindree:</span>
+                          <span className="detail-value">
+                            {car.engine.displacement}
+                          </span>
+                        </div>
+                        <div className="detail-row">
+                          <span className="detail-label">Putere:</span>
+                          <span className="detail-value">
+                            {car.engine.power}
+                          </span>
+                        </div>
+                        <div className="detail-row">
+                          <span className="detail-label">Cuplu:</span>
+                          <span className="detail-value">
+                            {car.engine.torque}
+                          </span>
+                        </div>
+                        <div className="detail-row">
+                          <span className="detail-label">Combustibil:</span>
+                          <span className="detail-value">
+                            {car.engine.fuelType}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+
+            {/* Loader element pentru infinite scroll */}
+            <div
+              ref={loaderRef}
+              style={{
+                minHeight: "60px",
+                margin: "30px 0",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: "8px",
+                backgroundColor: isFetchingNextPage ? "#f8f9fa" : "transparent",
+              }}
+            >
+              {isFetchingNextPage && (
+                <div
+                  className="card"
+                  style={{
+                    padding: "20px 30px",
+                    textAlign: "center",
+                    background:
+                      "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                    color: "white",
+                    borderRadius: "12px",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                    animation: "pulse 2s infinite",
+                  }}
+                >
+                  <div style={{ fontSize: "18px", marginBottom: "8px" }}>
+                    🔄 Se încarcă mai multe mașini...
+                  </div>
+                  <div style={{ fontSize: "12px", opacity: 0.8 }}>
+                    Pagina {data ? data.pages.length + 1 : 1} • 6 mașini pe
+                    pagină
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
     </>

@@ -26,10 +26,52 @@ const createEngine = async (engine) => {
   return data;
 };
 
-const getCars = async () => {
-  const response = await fetch(`${API_URL}/cars`);
-  const data = await response.json();
-  return data;
+const getCars = async (page = 1, pageSize = 6) => {
+  try {
+    console.log(`Fetching cars: page=${page}, pageSize=${pageSize}`);
+
+    const response = await fetch(
+      `${API_URL}/cars?page=${page}&pageSize=${pageSize}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(
+        `API Error: ${response.status} ${response.statusText}`,
+        errorText
+      );
+      throw new Error(
+        `Failed to fetch cars: ${response.status} ${response.statusText}`
+      );
+    }
+
+    const data = await response.json();
+    console.log(`Received ${data.length} cars for page ${page}`);
+
+    // Verificăm dacă data este array
+    if (!Array.isArray(data)) {
+      console.error("API response is not an array:", data);
+      throw new Error("Invalid API response format");
+    }
+
+    // Calculăm dacă mai sunt pagini următoare
+    const hasMore = data.length === pageSize;
+
+    return {
+      data, // array cu mașinile din pagina curentă
+      nextPage: hasMore ? page + 1 : undefined,
+      prevPage: page > 1 ? page - 1 : undefined,
+    };
+  } catch (error) {
+    console.error("Error in getCars:", error);
+    throw error;
+  }
 };
 
 const createCar = async (car) => {

@@ -95,15 +95,15 @@ const MotorcycleList = () => {
     <>
       <div className="container">
         <div className="page-header">
-          <h2 className="page-title">🏍️ Lista Motocicletelor</h2>
-          <input
-            type="text"
-            placeholder="🔍 Caută după marcă, model, culoare..."
-            value={filterBy}
-            onChange={(e) => setFilterBy(e.target.value)}
-            className="search-input"
-          />
           <div className="motoSortFilter">
+            <h2 className="page-title">🏍️ Lista Motocicletelor</h2>
+            <input
+              type="text"
+              placeholder="🔍 Caută după marcă, model, culoare..."
+              value={filterBy}
+              onChange={(e) => setFilterBy(e.target.value)}
+              className="search-input"
+            />
             <button
               className={`btn ${
                 sortBy === "year" ? "btn-active" : "btn-secondary"
