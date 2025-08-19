@@ -100,7 +100,7 @@ const CarList = () => {
   useEffect(() => {
     const handleEscKey = (event) => {
       if (event.key === "Escape" && showDeleteModal) {
-        setShowDeleteModal(false);
+        handleCloseModal();
       }
     };
 
@@ -144,45 +144,9 @@ const CarList = () => {
               color: "#dc3545",
             }}
           >
-            <h3>❌ Eroare la încărcarea mașinilor</h3>
             <p>
               <strong>Detalii:</strong> {error.message}
             </p>
-            <details style={{ marginTop: "10px" }}>
-              <summary style={{ cursor: "pointer", color: "#6c757d" }}>
-                Informații pentru debugging
-              </summary>
-              <div
-                style={{
-                  marginTop: "10px",
-                  padding: "10px",
-                  backgroundColor: "#f8f9fa",
-                  borderRadius: "4px",
-                  fontSize: "12px",
-                  fontFamily: "monospace",
-                }}
-              >
-                <p>
-                  <strong>URL API:</strong>{" "}
-                  http://localhost:5086/api/car-engine/cars
-                </p>
-                <p>
-                  <strong>Verifică:</strong>
-                </p>
-                <ul style={{ textAlign: "left", margin: "10px 0" }}>
-                  <li>Backend-ul rulează pe portul 5086?</li>
-                  <li>CORS este configurat corect?</li>
-                  <li>Există mașini în baza de date?</li>
-                </ul>
-              </div>
-            </details>
-            <button
-              onClick={() => window.location.reload()}
-              className="btn btn-secondary"
-              style={{ marginTop: "15px" }}
-            >
-              🔄 Reîncarcă pagina
-            </button>
           </div>
         </div>
       </div>
@@ -198,36 +162,17 @@ const CarList = () => {
     }
   };
 
+  // Funcție pentru închiderea modalului cu cleanup complet
+  const handleCloseModal = () => {
+    setShowDeleteModal(false);
+    // Timeout mic pentru a permite animația să se termine
+    setTimeout(() => {
+      setSelectedCar(null);
+    }, 300);
+  };
+
   return (
     <>
-      <div
-        className="delete-modal"
-        style={{ visibility: showDeleteModal ? "visible" : "hidden" }}
-        onClick={() => setShowDeleteModal(false)}
-      >
-        <div
-          className="delete-modal-content"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <h2>
-            Ștergere Mașină {selectedCar?.brand} {selectedCar?.model}
-          </h2>
-          <p>Vrei să ștergi această mașină?</p>
-          <button
-            className="deleteButton"
-            onClick={() => deleteCar(selectedCar.id)}
-          >
-            Șterge
-          </button>
-          <button
-            className="cancelButton"
-            onClick={() => setShowDeleteModal(false)}
-          >
-            Renunță
-          </button>
-        </div>
-      </div>
-
       <div className="container">
         <div className="page-header">
           <h2 className="page-title">🚗 Lista Mașinilor</h2>
@@ -455,6 +400,32 @@ const CarList = () => {
             </div>
           </>
         )}
+      </div>
+
+      {/* Modal de confirmare ștergere - plasat la sfârșit pentru consistență */}
+      <div
+        className="delete-modal"
+        style={{ visibility: showDeleteModal ? "visible" : "hidden" }}
+        onClick={handleCloseModal}
+      >
+        <div
+          className="delete-modal-content"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h2>
+            Ștergere Mașină {selectedCar?.brand} {selectedCar?.model}
+          </h2>
+          <p>Vrei să ștergi această mașină?</p>
+          <button
+            className="deleteButton"
+            onClick={() => deleteCar(selectedCar.id)}
+          >
+            Șterge
+          </button>
+          <button className="cancelButton" onClick={handleCloseModal}>
+            Renunță
+          </button>
+        </div>
       </div>
     </>
   );

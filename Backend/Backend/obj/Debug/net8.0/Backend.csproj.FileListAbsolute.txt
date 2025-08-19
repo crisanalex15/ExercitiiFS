@@ -561,3 +561,11 @@ C:\Users\crisa\Exercitii\Backend\Backend\obj\Debug\net8.0\refint\Backend.dll
 C:\Users\crisa\Exercitii\Backend\Backend\obj\Debug\net8.0\Backend.pdb
 C:\Users\crisa\Exercitii\Backend\Backend\obj\Debug\net8.0\Backend.genruntimeconfig.cache
 C:\Users\crisa\Exercitii\Backend\Backend\obj\Debug\net8.0\ref\Backend.dll
+C:\Users\crisa\Exercitii\Backend\Backend\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\crisa\Exercitii\Backend\Backend\bin\Debug\net8.0\Microsoft.IdentityModel.Abstractions.dll
+C:\Users\crisa\Exercitii\Backend\Backend\bin\Debug\net8.0\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Users\crisa\Exercitii\Backend\Backend\bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll
+C:\Users\crisa\Exercitii\Backend\Backend\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.dll
+C:\Users\crisa\Exercitii\Backend\Backend\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+C:\Users\crisa\Exercitii\Backend\Backend\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
+C:\Users\crisa\Exercitii\Backend\Backend\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll

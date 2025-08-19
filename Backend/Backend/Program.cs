@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Backend.Areas.Identity.Data;
 using Microsoft.OpenApi.Models;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace Backend
 {
@@ -29,7 +32,7 @@ namespace Backend
                 options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             // Configure Identity with ApplicationUser
-            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => 
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = false;
                 options.Password.RequireDigit = false;
@@ -45,7 +48,34 @@ namespace Backend
             .AddEntityFrameworkStores<AuthDbContext>()
             .AddDefaultTokenProviders();
 
-            // Configure cookie policy
+            // Configure JWT Authentication
+            var jwtSettings = builder.Configuration.GetSection("Jwt");
+            var secretKey = jwtSettings["SecretKey"] ?? "MyVeryLongSecretKeyForJWTAuthenticationThatIs32Characters";
+            var key = Encoding.ASCII.GetBytes(secretKey);
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtSettings["Issuer"] ?? "CarEngineAPI",
+                    ValidateAudience = true,
+                    ValidAudience = jwtSettings["Audience"] ?? "CarEngineApp",
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
+
+            // Configure cookie policy (pentru web pages)
             builder.Services.ConfigureApplicationCookie(options =>
             {
                 options.LoginPath = "/Identity/Account/Login";
@@ -54,6 +84,9 @@ namespace Backend
                 options.SlidingExpiration = true;
                 options.ExpireTimeSpan = TimeSpan.FromDays(7);
             });
+
+            // Register JWT Service
+            builder.Services.AddScoped<Backend.Services.IJwtService, Backend.Services.JwtService>();
 
             builder.Services.AddRazorPages();
 
@@ -64,11 +97,39 @@ namespace Backend
                     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
                 });
 
-            // Add Swagger service
+            // Add Swagger service with JWT support
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "BackEnd API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Car Engine API", Version = "v1" });
+
+                // Configure JWT authentication in Swagger
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            },
+                            Scheme = "oauth2",
+                            Name = "Bearer",
+                            In = ParameterLocation.Header,
+                        },
+                        new List<string>()
+                    }
+                });
             });
 
             var app = builder.Build();

@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Backend.Controllers
 {
-    [Authorize]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -26,6 +25,12 @@ namespace Backend.Controllers
         }
 
         public IActionResult GetToApi()
+        {
+            return Redirect("/swagger");
+        }
+
+        [AllowAnonymous]
+        public IActionResult Api()
         {
             return Redirect("/swagger");
         }
